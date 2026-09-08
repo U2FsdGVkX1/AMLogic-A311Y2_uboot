@@ -54,6 +54,11 @@ MEMORY {
 }
 #endif
 
+PHDRS {
+    text PT_LOAD FLAGS(5);   /* R+X */
+    data PT_LOAD FLAGS(6);   /* R+W */
+}
+
 SECTIONS
 {
     . = BL33Z_LOAD_ADDR;
@@ -72,20 +77,20 @@ SECTIONS
          */
         . = NEXT(8);
         __RO_END__ = .;
-    } >RAM
+    } >RAM :text
 
     .data . : {
         __DATA_START__ = .;
         *(.data*)
         __DATA_END__ = .;
-    } >RAM
+    } >RAM :data
 
     MARK_ADDR = .;
     stacks (NOLOAD) : {
         __STACKS_START__ = .;
         *(tzfw_normal_stacks)
         __STACKS_END__ = .;
-    } >STACK
+    } >STACK :NONE
     . = MARK_ADDR;
 
 #ifndef MOVE_BSS_SECTION
@@ -98,7 +103,7 @@ SECTIONS
         *(SORT_BY_ALIGNMENT(.bss*))
         *(COMMON)
         __BSS_END__ = .;
-    } >RAM
+    } >RAM :data
 #else
     MARK_ADDR = .;
     .bss : ALIGN(8) {
@@ -106,7 +111,7 @@ SECTIONS
         *(SORT_BY_ALIGNMENT(.bss*))
         *(COMMON)
         __BSS_END__ = .;
-    } >BSS
+    } >BSS :data
     . = MARK_ADDR;
 #endif
 
@@ -141,7 +146,7 @@ SECTIONS
          */
         . = NEXT(8);
         __COHERENT_RAM_END__ = .;
-    } >RAM
+    } >RAM :NONE
 #endif
 
     __BL33Z_END__ = .;
